@@ -4,7 +4,6 @@ import groq from "groq";
 import client from "../client";
 
 const Index = ({ posts }) => {
-  console.log(posts);
   return (
     <div>
       <h1>Welcome to my shitty blog.</h1>

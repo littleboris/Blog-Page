@@ -30,7 +30,6 @@ const ptComponents = {
 };
 
 const Post = ({ post }) => {
-  console.log(post);
   const {
     title = "Missing title",
     name = "Missing name",
