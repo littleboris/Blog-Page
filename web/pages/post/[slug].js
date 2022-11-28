@@ -88,6 +88,7 @@ export async function getStaticProps(context) {
   body
 }`;
 
+  console.log(getDataFromApi);
   const post = await client.fetch(getDataFromApi);
   return {
     props: {
