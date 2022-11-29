@@ -2,6 +2,7 @@ import client from "../../client";
 import groq from "groq";
 import imageUrlBuilder from "@sanity/image-url";
 import { PortableText } from "@portabletext/react";
+import { useRouter } from "next/router";
 
 function urlFor(source) {
   return imageUrlBuilder(client).image(source);
@@ -30,6 +31,17 @@ const ptComponents = {
 };
 
 const Post = ({ post }) => {
+  const router = useRouter();
+
+  if (!router.isFallback && !post) {
+    return <div />;
+  }
+
+  if (router.isFallback) {
+    return <div />;
+  }
+  console.log(post);
+
   const {
     title = "Missing title",
     name = "Missing name",
@@ -71,14 +83,13 @@ export async function getStaticPaths() {
   `
   );
   return {
-    // paths: paths.map((slug) => ({ params: { slug } })),
-    paths: [],
+    paths: paths.map((slug) => ({ params: { slug } })),
     fallback: true,
   };
 }
 //what i want returned from the API call
 export async function getStaticProps(context) {
-  const { slug = "" } = context.params;
+  const { slug } = context.params;
   const getDataFromApi = groq`*[_type == "post" && slug.current == "${slug}"][0]{
   title,
   "name": author->name,
@@ -89,10 +100,12 @@ export async function getStaticProps(context) {
 
   console.log(getDataFromApi);
   const post = await client.fetch(getDataFromApi);
+  console.log(post);
   return {
     props: {
       post,
     },
+    notFound: post ? false : true,
   };
 }
 
