@@ -2,7 +2,7 @@ import Link from "next/link";
 import groq from "groq";
 import client from "../client";
 
-const Index = ({ posts }) => {
+const Index = ({ posts, projects }) => {
   return (
     <div>
       <h1>Welcome to a blog!</h1>
@@ -22,13 +22,31 @@ const Index = ({ posts }) => {
   );
 };
 
+const Projects = ({ projects }) => {
+  return (
+    <div>
+      <h1>Projects so far</h1>
+      {projects.length > 0 &&
+        projects.map(
+          ({ title = "", slug = "" }) =>
+            slug && (
+              <Link href="./projects/[slug]" as={`/projects/${slug.current}`}>
+                <h1>{title}</h1>
+              </Link>
+            )
+        )}
+    </div>
+  );
+};
+
 export async function getStaticProps() {
   const posts = await client.fetch(groq`
-      *[_type == "post" && publishedAt < now()] | order(publishedAt desc)
+      *[_type == ["post", "projects"] && publishedAt < now()] | order(publishedAt desc)
     `);
   return {
     props: {
       posts,
+      // projects,
     },
   };
 }
