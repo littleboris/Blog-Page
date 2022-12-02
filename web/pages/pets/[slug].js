@@ -30,29 +30,32 @@ const ptComponents = {
   },
 };
 
-const Projects = ({ projects }) => {
+const Pets = ({ pets }) => {
   const router = useRouter();
 
-  if (!router.isFallback && !projects) {
+  if (!router.isFallback && !pets) {
     return <div />;
   }
 
   if (router.isFallback) {
     return <div />;
   }
-  console.log(projects);
+  console.log(pets);
 
   const {
     title = "Missing title",
     name = "Missing name",
     categories,
-    authorImage,
     body = [],
-  } = projects;
+    nickname,
+  } = pets;
   return (
     <article>
       <h1>{title}</h1>
-      <h3>By: {name}</h3>
+      <h4>My pets name is {nickname}</h4>
+
+      <PortableText value={body} components={ptComponents} />
+      <h3>Posted By: {name}</h3>
       {categories && (
         <ul>
           Posted in
@@ -61,17 +64,6 @@ const Projects = ({ projects }) => {
           ))}
         </ul>
       )}
-      {/*om authorImage finns så körs nedanför */}
-      {authorImage && (
-        <div>
-          <img
-            src={urlFor(authorImage).width(200).height(200).url()}
-            alt={`${name}'s picture`}
-          />
-        </div>
-      )}
-
-      <PortableText value={body} components={ptComponents} />
     </article>
   );
 };
@@ -79,7 +71,7 @@ const Projects = ({ projects }) => {
 
 export async function getStaticPaths() {
   const paths = await client.fetch(
-    `*[_type == "projects" && defined(slug.current)][].slug.current
+    `*[_type == "pets" && defined(slug.current)][].slug.current
   `
   );
   return {
@@ -90,11 +82,12 @@ export async function getStaticPaths() {
 //what i want returned from the API call
 export async function getStaticProps(context) {
   const { slug } = context.params;
-  const getDataFromApi = groq`*[_type in ["projects"] && slug.current == "${slug}"][0]{
-   _type == "projects" => {
+  const getDataFromApi = groq`*[_type in ["pets"] && slug.current == "${slug}"][0]{
+   _type == "pets" => {
     title, _id, slug,
     "name": author->name,
     "authorImage": author->image,
+    nickname,
   body,
   "categories": categories[]->title,
   }
@@ -102,14 +95,14 @@ export async function getStaticProps(context) {
 }`;
 
   console.log(getDataFromApi);
-  const projects = await client.fetch(getDataFromApi);
-  console.log(projects);
+  const pets = await client.fetch(getDataFromApi);
+  console.log(pets);
   return {
     props: {
-      projects,
+      pets,
     },
-    notFound: projects ? false : true,
+    notFound: pets ? false : true,
   };
 }
 
-export default Projects;
+export default Pets;
